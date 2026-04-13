@@ -1,16 +1,29 @@
 using { sap.capire.incidents as my } from '../db/schema';
 
-service ProcessorsService {
+/**
+ * Service used by support personell, i.e. the incidents' 'processors'.
+ */
+service ProcessorService { 
+    entity Incidents as projection on my.Incidents;
 
-  entity Incidents as projection on my.Incidents;
-  entity Customers as projection on my.Customers;
-  
+    @readonly
+    entity Customers as projection on my.Customers;
 }
 
-extend projection ProcessorsService.Customers with {
-  firstName || ' ' || lastName as name: String
+annotate ProcessorService.Incidents with @odata.draft.enabled;
+
+annotate ProcessorService with @(requires: 'support') ;
+
+
+/**
+ * Service used by administrators to manage customers and incidents.
+ */
+service AdminService {
+    entity Customers as projection on my.Customers;
+    entity Incidents as projection on my.Incidents;
 }
 
-// annotate ProcessorsService.Incidents with @odata.draft.enabled;
+annotate AdminService with @(requires: 'admin');
 
-// annotate ProcessorsService with @(requires: ['support']);
+
+
